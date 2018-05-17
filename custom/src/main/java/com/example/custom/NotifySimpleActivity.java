@@ -6,11 +6,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+
+import com.example.custom.util.NotifyUtil;
 
 /**
  * Created by ouyangshen on 2017/10/14.
@@ -46,19 +49,25 @@ public class NotifySimpleActivity extends AppCompatActivity implements OnClickLi
                 R.string.app_name, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         // 创建一个通知消息的构造器
         Notification.Builder builder = new Notification.Builder(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Android 8.0开始必须给每个通知分配对应的渠道
+            builder = new Notification.Builder(this, getString(R.string.app_name));
+        }
         builder.setContentIntent(contentIntent) // 设置内容的点击意图
                 .setAutoCancel(true) // 设置是否允许自动清除
                 .setSmallIcon(R.drawable.ic_app) // 设置状态栏里的小图标
                 //.setSubText("这里是副本") // 设置通知栏里面的附加说明文本
                 .setTicker("提示消息来啦") // 设置状态栏里面的提示文本
                 .setWhen(System.currentTimeMillis()) // 设置推送时间，格式为“小时：分钟”
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_app)) // 设置通知栏里面的大图标
+                // 设置通知栏里面的大图标
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_app))
                 .setContentTitle(title) // 设置通知栏里面的标题文本
                 .setContentText(message); // 设置通知栏里面的内容文本
         // 根据消息构造器构建一个通知对象
         Notification notify = builder.build();
         // 从系统服务中获取通知管理器
-        NotificationManager notifyMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notifyMgr = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
         // 使用通知管理器推送通知，然后在手机的通知栏就会看到该消息
         notifyMgr.notify(R.string.app_name, notify);
     }
